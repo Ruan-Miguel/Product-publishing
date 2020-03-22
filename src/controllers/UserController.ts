@@ -1,7 +1,9 @@
 import { Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 import { Error } from 'mongoose'
 
 import User from '../schemas/User'
+import authConfig from '../config/auth.json'
 
 interface UserInterface {
   name: string;
@@ -11,7 +13,13 @@ interface UserInterface {
 }
 
 class UserController {
-  private dateFormater (date: string): string {
+  private generateToken (id: string): string {
+    return jwt.sign({ id }, authConfig.secret, {
+      expiresIn: 86400
+    })
+  }
+
+  private dateFormater (date: string): string | null {
     const dateFormat = /^\d{2}\/\d{2}\/\d{4}$/
 
     if (!dateFormat.test(date)) {
@@ -39,8 +47,25 @@ class UserController {
     }
 
     return User.create(newUser)
-      .then(() => res.status(201).send())
+      .then(({ _id: id }: { _id: string }) => {
+        const token = this.generateToken(id)
+        return res.status(201).json(token)
+      })
       .catch((err: Error) => res.status(400).json(err.message))
+  }
+
+  public login = async (req: Request, res: Response): Promise<Response> => {
+    const { email, password }: { email: string; password: string } = req.body
+
+    const user = await User.findOne({ email: email }, { password: true })
+
+    if (user && user.password === password) {
+      const token = this.generateToken(user._id)
+
+      return res.json(token)
+    }
+
+    return res.status(400).json('incorrect email or password')
   }
 
   public async read (req: Request, res: Response): Promise<Response> {
