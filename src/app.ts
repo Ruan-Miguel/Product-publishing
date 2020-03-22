@@ -23,7 +23,8 @@ class App {
   private database (): void {
     mongoose.connect('mongodb://localhost:27017/compra_e_publicacao', {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      useCreateIndex: true
     })
       .catch(() => {
         console.log('error connecting to the database')
