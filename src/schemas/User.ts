@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose'
+import bcrypt from 'bcrypt'
 
 interface UserInterface extends Document {
     name: string;
@@ -31,6 +32,15 @@ const userSchema = new Schema({
     max: [new Date().toISOString(), 'the date informed is from the future'],
     required: true
   }
+})
+
+userSchema.pre('save', async function (next) {
+  console.log(this.get('password'))
+
+  const hash = await bcrypt.hash(this.get('password'), 10)
+  this.set('password', hash)
+
+  next()
 })
 
 export default model<UserInterface>('User', userSchema)

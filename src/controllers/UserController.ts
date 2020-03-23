@@ -1,16 +1,17 @@
 import { Request, Response } from 'express'
+import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { Error } from 'mongoose'
 
 import User from '../schemas/User'
 import authConfig from '../config/auth.json'
 
-interface UserInterface {
+/* interface UserInterface {
   name: string;
   email: string;
   password: string;
   dateOfBirth: string;
-}
+} */
 
 class UserController {
   private generateToken (id: string): string {
@@ -59,7 +60,7 @@ class UserController {
 
     const user = await User.findOne({ email: email }, { password: true })
 
-    if (user && user.password === password) {
+    if (user && await bcrypt.compare(password, user.password)) {
       const token = this.generateToken(user._id)
 
       return res.json(token)
