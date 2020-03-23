@@ -74,6 +74,20 @@ class UserController {
 
     return res.json(users)
   }
+
+  public async delete (req: Request, res: Response): Promise<Response> {
+    const id = req.body.userId
+
+    return User.findByIdAndDelete(id)
+      .then((userDeleted) => {
+        if (userDeleted) {
+          return res.send()
+        }
+
+        return res.status(400).json('the token used does not belong to any user registered in the database')
+      })
+      .catch(err => res.status(500).json(err))
+  }
 }
 
 export default new UserController()

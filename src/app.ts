@@ -2,7 +2,8 @@ import express, { Application } from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
 
-import routes from './routes'
+import simpleRoutes from './routes/simpleRoutes'
+import privateRoutes from './routes/privateRoutes'
 
 class App {
   public express: Application
@@ -32,7 +33,8 @@ class App {
   }
 
   private routes (): void {
-    this.express.use(routes)
+    this.express.use(simpleRoutes)
+    this.express.use(privateRoutes)
   }
 }
 
