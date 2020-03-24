@@ -6,13 +6,6 @@ import { Error } from 'mongoose'
 import User from '../schemas/User'
 import authConfig from '../config/auth.json'
 
-/* interface UserInterface {
-  name: string;
-  email: string;
-  password: string;
-  dateOfBirth: string;
-} */
-
 class UserController {
   private generateToken (id: string): string {
     return jwt.sign({ id }, authConfig.secret, {
@@ -41,10 +34,14 @@ class UserController {
   public create = async (req: Request, res: Response): Promise<Response> => {
     const newUser = req.body
 
+    if (newUser._id) {
+      return res.status(400).json('You can not specify your Id')
+    }
+
     newUser.dateOfBirth = this.dateFormater(newUser.dateOfBirth)
 
     if (!newUser.dateOfBirth) {
-      return res.status(400).json({ error: 'Invalid date' })
+      return res.status(400).json('Invalid date')
     }
 
     return User.create(newUser)
@@ -57,6 +54,10 @@ class UserController {
 
   public login = async (req: Request, res: Response): Promise<Response> => {
     const { email, password }: { email: string; password: string } = req.body
+
+    if (!email || !password) {
+      return res.status(400).json('no email or password provided')
+    }
 
     const user = await User.findOne({ email: email }, { password: true })
 
@@ -84,7 +85,7 @@ class UserController {
           return res.send()
         }
 
-        return res.status(400).json('the token used does not belong to any user registered in the database')
+        return res.status(401).json('the token used does not belong to any user registered in the database')
       })
       .catch(err => res.status(500).json(err))
   }
