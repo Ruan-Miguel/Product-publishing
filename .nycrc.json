@@ -1,0 +1,18 @@
+{
+  "extension": [
+    ".ts"
+  ],
+  "include": [
+    "src/app/**/*.ts"
+  ],
+  "exclude": [
+    "src/app/server.ts",
+    "src/app/routes/**",
+    "src/app/schemas/**"
+  ],
+  "reporter": [
+    "text",
+    "text-summary"
+  ],
+  "all": true
+}
