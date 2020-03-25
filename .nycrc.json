@@ -7,6 +7,7 @@
   ],
   "exclude": [
     "src/app/server.ts",
+    "src/app/app.ts",
     "src/app/routes/**",
     "src/app/schemas/**"
   ],
