@@ -63,7 +63,7 @@ class UserController {
 
         return res.status(401).json('the token used does not belong to any user registered in the database')
       })
-      .catch(err => res.status(500).json(err))
+      .catch(err => res.status(400).json(err))
   }
 }
 

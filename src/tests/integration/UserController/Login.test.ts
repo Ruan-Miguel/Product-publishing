@@ -14,8 +14,6 @@ describe('Login function tests', () => {
 
   before(async () => {
     await UserModel.deleteMany({})
-      .then(() => console.log('terminou'))
-      .catch(() => console.log('terminou'))
 
     const user = ObjectGenerator.userCreation()
 
@@ -27,7 +25,7 @@ describe('Login function tests', () => {
       .send(user)
   })
 
-  it('should correctly login', async () => {
+  it('Should correctly login', async () => {
     const res = await chai.request(app)
       .post('/users/login')
       .send({
@@ -36,5 +34,54 @@ describe('Login function tests', () => {
       })
 
     chai.expect(res.status).to.be.equal(200)
+  })
+
+  it('Should fail because do not provides email', async () => {
+    const res = await chai.request(app)
+      .post('/users/login')
+      .send({
+        password: userPassword
+      })
+
+    chai.expect(res.status).to.be.equal(400)
+  })
+
+  it('Should fail because do not provides password', async () => {
+    const res = await chai.request(app)
+      .post('/users/login')
+      .send({
+        email: userEmail
+      })
+
+    chai.expect(res.status).to.be.equal(400)
+  })
+
+  it('Should fail because do not provides email or password', async () => {
+    const res = await chai.request(app)
+      .post('/users/login')
+
+    chai.expect(res.status).to.be.equal(400)
+  })
+
+  it('Should fail because provides the wrong email', async () => {
+    const res = await chai.request(app)
+      .post('/users/login')
+      .send({
+        email: userEmail.slice(0, userEmail.length - 1),
+        password: userPassword
+      })
+
+    chai.expect(res.status).to.be.equal(400)
+  })
+
+  it('Should fail because provides the wrong password', async () => {
+    const res = await chai.request(app)
+      .post('/users/login')
+      .send({
+        email: userEmail,
+        password: userPassword.slice(0, userPassword.length - 1)
+      })
+
+    chai.expect(res.status).to.be.equal(400)
   })
 })
