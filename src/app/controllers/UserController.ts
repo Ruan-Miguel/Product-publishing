@@ -13,35 +13,11 @@ class UserController {
     })
   }
 
-  private dateFormater (date: string): string | null {
-    const dateFormat = /^\d{2}\/\d{2}\/\d{4}$/
-
-    if (!dateFormat.test(date)) {
-      return null
-    }
-
-    const [day, month, year] = date.split('/')
-
-    const newDate = year + '-' + month + '-' + day + 'T00:00'
-
-    if (new Date(newDate).toString() === 'Invalid Date') {
-      return null
-    }
-
-    return newDate
-  }
-
   public create = async (req: Request, res: Response): Promise<Response> => {
     const newUser = req.body
 
     if (newUser._id) {
       return res.status(400).json('You can not specify your Id')
-    }
-
-    newUser.dateOfBirth = this.dateFormater(newUser.dateOfBirth)
-
-    if (!newUser.dateOfBirth) {
-      return res.status(400).json('Invalid date')
     }
 
     return User.create(newUser)
