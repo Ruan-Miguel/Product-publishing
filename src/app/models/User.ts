@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
 import bcrypt from 'bcrypt'
 
 interface UserInterface extends Document {
@@ -40,5 +41,7 @@ userSchema.pre('save', async function (next) {
 
   next()
 })
+
+userSchema.plugin(mongoosePaginate)
 
 export default model<UserInterface>('User', userSchema)

@@ -4,7 +4,7 @@ import chaiHttp from 'chai-http'
 
 import app from '../../../app/app'
 import ObjectGenerator from '../../utils/ObjectGenerator'
-import UserModel from '../../../app/schemas/User'
+import UserModel from '../../../app/models/User'
 
 chai.use(chaiHttp)
 

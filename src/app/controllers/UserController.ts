@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { Error } from 'mongoose'
 
-import User from '../schemas/User'
+import User from '../models/User'
 import authConfig from '../config/auth.json'
 
 class UserController {
@@ -46,8 +46,13 @@ class UserController {
     return res.status(400).json('incorrect email or password')
   }
 
-  public async read (req: Request, res: Response): Promise<Response> {
-    const users = await User.find()
+  public async findByEmail (req: Request, res: Response): Promise<Response> {
+    let { email } = req.query
+    const { page, limit } = req.query
+
+    email = email.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+
+    const users = await User.paginate({ email: { $regex: new RegExp(email, 'i') } }, { page: parseInt(page), limit: parseInt(limit) })
 
     return res.json(users)
   }
