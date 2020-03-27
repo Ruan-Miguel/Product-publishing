@@ -4,7 +4,7 @@ import chaiHttp from 'chai-http'
 
 import app from '../../../app/app'
 import ObjectGenerator from '../../utils/ObjectGenerator'
-import UserModel from '../../../app/models/User'
+import ClearDatabase from '../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
@@ -13,7 +13,7 @@ describe('Login function tests', () => {
   let userPassword: string
 
   before(async () => {
-    await UserModel.deleteMany({})
+    await ClearDatabase.clearUsers()
 
     const user = ObjectGenerator.userCreation()
 

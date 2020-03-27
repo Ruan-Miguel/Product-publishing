@@ -7,7 +7,7 @@ type UserCreationInterface = {
 }
 
 class ObjectGenerator {
-  public userCreation (specifications?: UserCreationInterface | null, exclude?: UserCreationTypes): UserCreationInterface {
+  public static userCreation (specifications?: UserCreationInterface | null, exclude?: UserCreationTypes): UserCreationInterface {
     const user = {
       name: faker.name.findName(),
       email: faker.internet.email(),
@@ -41,4 +41,4 @@ class ObjectGenerator {
   }
 }
 
-export default new ObjectGenerator()
+export default ObjectGenerator

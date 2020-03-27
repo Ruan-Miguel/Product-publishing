@@ -50,9 +50,15 @@ class UserController {
     let { email } = req.query
     const { page, limit } = req.query
 
-    email = email.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+    let users
 
-    const users = await User.paginate({ email: { $regex: new RegExp(email, 'i') } }, { page: parseInt(page), limit: parseInt(limit) })
+    if (email) {
+      email = email.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+
+      users = await User.paginate({ email: { $regex: new RegExp(email, 'i') } }, { page: parseInt(page), limit: parseInt(limit) })
+    } else {
+      users = await User.paginate({}, { page: parseInt(page), limit: parseInt(limit) })
+    }
 
     return res.json(users)
   }
@@ -68,7 +74,6 @@ class UserController {
 
         return res.status(401).json('the token used does not belong to any user registered in the database')
       })
-      .catch(err => res.status(400).json(err))
   }
 }
 

@@ -5,13 +5,13 @@ import faker from 'faker'
 
 import app from '../../../app/app'
 import ObjectGenerator from '../../utils/ObjectGenerator'
-import UserModel from '../../../app/models/User'
+import ClearDatabase from '../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
 describe('Create function tests', () => {
   beforeEach(async () => {
-    return UserModel.deleteMany({})
+    return ClearDatabase.clearUsers()
   })
 
   it('should create an user', async () => {
