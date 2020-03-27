@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model, Document, PaginateModel } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import bcrypt from 'bcrypt'
 
@@ -44,4 +44,4 @@ userSchema.pre('save', async function (next) {
 
 userSchema.plugin(mongoosePaginate)
 
-export default model<UserInterface>('User', userSchema)
+export default (model<UserInterface>('User', userSchema) as PaginateModel<UserInterface>)
