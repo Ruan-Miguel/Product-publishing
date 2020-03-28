@@ -67,12 +67,8 @@ class UserController {
     const id = req.body.userId
 
     return User.findByIdAndDelete(id)
-      .then((userDeleted) => {
-        if (userDeleted) {
-          return res.send()
-        }
-
-        return res.status(401).json('the token used does not belong to any user registered in the database')
+      .then(() => {
+        return res.send()
       })
   }
 }

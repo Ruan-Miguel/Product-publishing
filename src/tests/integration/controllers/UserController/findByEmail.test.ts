@@ -2,7 +2,7 @@ import chai from 'chai'
 import { describe, it } from 'mocha'
 import chaiHttp from 'chai-http'
 
-import app from '../../../app/app'
+import app from '../../../../app/app'
 
 chai.use(chaiHttp)
 

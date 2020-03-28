@@ -26,6 +26,10 @@ const productSchema = new Schema({
     type: String,
     required: true
   },
+  price: {
+    type: Number,
+    min: 0.01
+  },
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'User',

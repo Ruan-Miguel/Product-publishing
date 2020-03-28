@@ -6,6 +6,14 @@ type UserCreationInterface = {
   [property in UserCreationTypes]?: string
 }
 
+type ProductCreationInterface = {
+  name: string;
+  description: string;
+  categories: Array<string>;
+  image: string;
+  price: number;
+}
+
 class ObjectGenerator {
   public static userCreation (specifications?: UserCreationInterface | null, exclude?: UserCreationTypes): UserCreationInterface {
     const user = {
@@ -16,21 +24,7 @@ class ObjectGenerator {
     }
 
     if (specifications) {
-      if (specifications.name) {
-        user.name = specifications.name
-      }
-
-      if (specifications.email) {
-        user.email = specifications.email
-      }
-
-      if (specifications.password) {
-        user.password = specifications.password
-      }
-
-      if (specifications.dateOfBirth) {
-        user.dateOfBirth = specifications.dateOfBirth
-      }
+      Object.assign(user, specifications)
     }
 
     if (exclude) {
@@ -38,6 +32,26 @@ class ObjectGenerator {
     }
 
     return user
+  }
+
+  public static productCreation (specifications?: ProductCreationInterface | null, exclude?: keyof ProductCreationInterface): ProductCreationInterface {
+    const product: ProductCreationInterface = {
+      name: faker.commerce.product(),
+      description: faker.lorem.sentence(),
+      categories: [faker.commerce.productAdjective()],
+      price: parseFloat(faker.commerce.price()),
+      image: faker.image.imageUrl()
+    }
+
+    if (specifications) {
+      Object.assign(product, specifications)
+    }
+
+    if (exclude) {
+      delete product[exclude]
+    }
+
+    return product
   }
 }
 

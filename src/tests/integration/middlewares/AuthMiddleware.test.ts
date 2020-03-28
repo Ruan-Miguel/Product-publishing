@@ -59,4 +59,16 @@ describe('Authentication function tests', () => {
 
     chai.expect(res.status).to.be.equal(401)
   })
+
+  it('Should fail because provides a token for a user that does not exist in the database', async () => {
+    await chai.request(app)
+      .delete('/users')
+      .set('Authorization', 'Bearer ' + token)
+
+    const res = await chai.request(app)
+      .delete('/users')
+      .set('Authorization', 'Bearer ' + token)
+
+    chai.expect(res.status).to.be.equal(401)
+  })
 })

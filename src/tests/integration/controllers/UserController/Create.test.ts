@@ -3,9 +3,9 @@ import { describe, it, beforeEach } from 'mocha'
 import chaiHttp from 'chai-http'
 import faker from 'faker'
 
-import app from '../../../app/app'
-import ObjectGenerator from '../../utils/ObjectGenerator'
-import ClearDatabase from '../../utils/ClearDatabase'
+import app from '../../../../app/app'
+import ObjectGenerator from '../../../utils/ObjectGenerator'
+import ClearDatabase from '../../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 

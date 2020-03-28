@@ -2,9 +2,9 @@ import chai from 'chai'
 import { describe, it, beforeEach } from 'mocha'
 import chaiHttp from 'chai-http'
 
-import app from '../../../app/app'
-import ObjectGenerator from '../../utils/ObjectGenerator'
-import ClearDatabase from '../../utils/ClearDatabase'
+import app from '../../../../app/app'
+import ObjectGenerator from '../../../utils/ObjectGenerator'
+import ClearDatabase from '../../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
@@ -27,17 +27,5 @@ describe('Delete function tests', () => {
       .set('Authorization', 'Bearer ' + token)
 
     chai.expect(res.status).to.be.equal(200)
-  })
-
-  it('Should fail because provides a token for a user that does not exist in the database', async () => {
-    await chai.request(app)
-      .delete('/users')
-      .set('Authorization', 'Bearer ' + token)
-
-    const res = await chai.request(app)
-      .delete('/users')
-      .set('Authorization', 'Bearer ' + token)
-
-    chai.expect(res.status).to.be.equal(401)
   })
 })
