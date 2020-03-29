@@ -16,7 +16,10 @@ const productSchema = new Schema({
   },
   categories: {
     type: [String],
-    required: true
+    validate: {
+      message: 'Path `categories` is required',
+      validator: (categories: Array<string>): boolean => categories.length !== 0
+    }
   },
   description: {
     type: String,
@@ -28,7 +31,8 @@ const productSchema = new Schema({
   },
   price: {
     type: Number,
-    min: 0.01
+    min: [0.01, 'null or negative prices are not allowed'],
+    required: true
   },
   owner: {
     type: Schema.Types.ObjectId,

@@ -7,11 +7,11 @@ type UserCreationInterface = {
 }
 
 type ProductCreationInterface = {
-  name: string;
-  description: string;
-  categories: Array<string>;
-  image: string;
-  price: number;
+  name?: string;
+  description?: string;
+  categories?: Array<string>;
+  image?: string;
+  price?: number;
 }
 
 class ObjectGenerator {
