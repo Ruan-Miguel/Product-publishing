@@ -5,7 +5,7 @@ import ProductController from '../controllers/ProductController'
 
 const routes = Router()
 
-routes.get('/users', UserController.findByEmail)
+routes.get('/users', UserController.find)
 routes.post('/users', UserController.create)
 routes.post('/users/login', UserController.login)
 

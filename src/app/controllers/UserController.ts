@@ -46,21 +46,35 @@ class UserController {
     return res.status(400).json('incorrect email or password')
   }
 
-  public async findByEmail (req: Request, res: Response): Promise<Response> {
-    let { email } = req.query
-    const { page, limit } = req.query
+  public async find (req: Request, res: Response): Promise<Response> {
+    const { searchParam, page, limit } = req.query
 
-    let users
+    let { searchValue } = req.query
 
-    if (email) {
-      email = email.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+    if (searchParam && searchValue) {
+      const searchableParameters = ['_id', 'name', 'email']
 
-      users = await User.paginate({ email: { $regex: new RegExp(email, 'i') } }, { page: parseInt(page), limit: parseInt(limit) })
+      if (searchableParameters.some((parameter) => parameter === searchParam)) {
+        if (searchParam === '_id') {
+          return User.findById(searchValue)
+            .then((users) => res.json(users))
+            .catch((err: Error) => res.status(400).json(err.message))
+        } else {
+          searchValue = searchValue.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+
+          return User.paginate(
+            { [searchParam]: { $regex: new RegExp(searchValue, 'i') } },
+            { page: parseInt(page), limit: parseInt(limit) }
+          )
+            .then((users) => res.json(users))
+        }
+      }
+
+      return res.status(400).json('an unrecognized searchParam was provided')
     } else {
-      users = await User.paginate({}, { page: parseInt(page), limit: parseInt(limit) })
+      return User.paginate({}, { page: parseInt(page), limit: parseInt(limit) })
+        .then((users) => res.json(users))
     }
-
-    return res.json(users)
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {
