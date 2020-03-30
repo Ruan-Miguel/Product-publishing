@@ -6,10 +6,10 @@ import app from '../../../../app/app'
 
 chai.use(chaiHttp)
 
-describe('Testing user research routes', () => {
+describe('Testing product research routes', () => {
   it('should perform a search without an email', async () => {
     const res = await chai.request(app)
-      .get('/users')
+      .get('/products')
       .query({
         page: 1,
         limit: 10
@@ -18,11 +18,11 @@ describe('Testing user research routes', () => {
     chai.expect(res.status).to.be.equal(200)
   })
 
-  it('should perform a search with an email', async () => {
+  it('should perform a search with an name', async () => {
     const res = await chai.request(app)
-      .get('/users')
+      .get('/products')
       .query({
-        email: 'person',
+        name: 'product',
         page: 1,
         limit: 10
       })

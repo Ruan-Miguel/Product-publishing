@@ -9,7 +9,7 @@ import ClearDatabase from '../../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
-describe('Create function tests', () => {
+describe('Product creation routes tests', () => {
   let token: string
 
   before(async () => {

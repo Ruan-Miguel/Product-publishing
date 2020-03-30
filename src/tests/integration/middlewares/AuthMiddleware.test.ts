@@ -8,7 +8,7 @@ import ClearDatabase from '../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
-describe('Authentication function tests', () => {
+describe('Authentication middleware testing', () => {
   let token: string
 
   beforeEach(async () => {

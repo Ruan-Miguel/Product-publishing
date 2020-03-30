@@ -8,7 +8,7 @@ import ClearDatabase from '../../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
-describe('Login function tests', () => {
+describe('Testing user login routes', () => {
   let userEmail: string
   let userPassword: string
 

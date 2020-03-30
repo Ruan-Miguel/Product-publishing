@@ -9,7 +9,7 @@ import ClearDatabase from '../../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
-describe('Create function tests', () => {
+describe('User creation routes tests', () => {
   beforeEach(async () => {
     return ClearDatabase.clearUsers()
   })

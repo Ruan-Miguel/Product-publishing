@@ -8,7 +8,7 @@ import ClearDatabase from '../../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
-describe('Delete function tests', () => {
+describe('User removal routes tests', () => {
   let token: string
 
   beforeEach(async () => {

@@ -9,7 +9,7 @@ import ClearDatabase from '../../../utils/ClearDatabase'
 
 chai.use(chaiHttp)
 
-describe('Delete function tests', () => {
+describe('Product removal routes tests', () => {
   let token: string
   let productId: string
 
