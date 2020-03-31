@@ -16,17 +16,41 @@ class ProductController {
   }
 
   public async findByName (req: Request, res: Response): Promise<Response> {
-    const { name, page, limit } = req.query
+    const { searchParam, page, limit } = req.query
 
-    let products
+    let { searchValue } = req.query
 
-    if (name) {
-      products = await Product.paginate({ name: { $regex: new RegExp(name, 'i') } }, { page, limit, populate: 'owner' })
+    if (searchParam && searchValue) {
+      const searchableParameters = ['_id', 'name', 'categories', 'owner']
+
+      if (searchableParameters.some((parameter) => parameter === searchParam)) {
+        if (searchParam === '_id') {
+          return Product.findById(searchValue)
+            .then((product) => res.json(product))
+            .catch((err: Error) => res.status(400).json(err.message))
+        } else if (searchParam === 'owner') {
+          return Product.paginate(
+            { owner: searchValue },
+            { page, limit, populate: 'owner' }
+          )
+            .then((products) => res.json(products))
+            .catch((err: Error) => res.status(400).json(err.message))
+        } else {
+          searchValue = searchValue.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+
+          return Product.paginate(
+            { [searchParam]: { $regex: new RegExp(searchValue, 'i') } },
+            { page, limit, populate: 'owner' }
+          )
+            .then((products) => res.json(products))
+        }
+      }
+
+      return res.status(400).json('an unrecognized searchParam was provided')
     } else {
-      products = await Product.paginate({}, { page, limit, populate: 'owner' })
+      return Product.paginate({}, { page, limit, populate: 'owner' })
+        .then((users) => res.json(users))
     }
-
-    return res.json(products)
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {

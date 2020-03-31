@@ -27,12 +27,15 @@ class AuthMiddleware {
         return res.status(401).json('Token invalid')
       }
 
-      const user = await User.findById((decoded as TokenDecoded).id)
+      if ((decoded as TokenDecoded).id) {
+        const user = await User.findById((decoded as TokenDecoded).id)
+          .catch(() => null)
 
-      if (user) {
-        req.body.userId = (decoded as TokenDecoded).id
+        if (user) {
+          req.body.userId = (decoded as TokenDecoded).id
 
-        return next()
+          return next()
+        }
       }
 
       return res.status(401).json('the token used does not belong to any user registered in the database')

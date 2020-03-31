@@ -1,6 +1,7 @@
 import chai from 'chai'
 import { describe, it, before } from 'mocha'
 import chaiHttp from 'chai-http'
+import faker from 'faker'
 
 import app from '../../../../app/app'
 import ObjectGenerator from '../../../utils/ObjectGenerator'
@@ -20,14 +21,12 @@ describe('Testing user research routes', () => {
       ({ name, email, dateOfBirth } = user)
     }
 
-    console.log(name, email, dateOfBirth)
-
-    await chai.request(app)
+    return chai.request(app)
       .post('/users')
       .send(user)
   })
 
-  it('Should perform a search without searchParam', async () => {
+  it('Should perform a search without searchParam or searchValue', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
@@ -39,13 +38,26 @@ describe('Testing user research routes', () => {
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
   })
 
+  it('Should perform a search without searchParam', async () => {
+    const res = await chai.request(app)
+      .get('/users')
+      .query({
+        page: 1,
+        limit: 10,
+        searchValue: faker.random.word()
+      })
+
+    chai.expect(res.status).to.be.equal(200)
+    chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
+  })
+
   it('Should perform a search without searchValue', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
-        searchParam: 'name',
         page: 1,
-        limit: 10
+        limit: 10,
+        searchParam: 'name'
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -70,7 +82,7 @@ describe('Testing user research routes', () => {
       .get('/users')
       .query({
         searchParam: '_id',
-        searchValue: 'person',
+        searchValue: faker.random.word(),
         page: 1,
         limit: 10
       })

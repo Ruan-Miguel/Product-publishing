@@ -57,14 +57,14 @@ class UserController {
       if (searchableParameters.some((parameter) => parameter === searchParam)) {
         if (searchParam === '_id') {
           return User.findById(searchValue)
-            .then((users) => res.json(users))
+            .then((user) => res.json(user))
             .catch((err: Error) => res.status(400).json(err.message))
         } else {
           searchValue = searchValue.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
 
           return User.paginate(
             { [searchParam]: { $regex: new RegExp(searchValue, 'i') } },
-            { page: parseInt(page), limit: parseInt(limit) }
+            { page, limit }
           )
             .then((users) => res.json(users))
         }
@@ -72,7 +72,7 @@ class UserController {
 
       return res.status(400).json('an unrecognized searchParam was provided')
     } else {
-      return User.paginate({}, { page: parseInt(page), limit: parseInt(limit) })
+      return User.paginate({}, { page, limit })
         .then((users) => res.json(users))
     }
   }
