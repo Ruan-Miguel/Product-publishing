@@ -11,5 +11,6 @@ routes.use(AuthMiddleware.authVerification)
 routes.delete('/users', UserController.delete)
 routes.post('/products', ProductController.create)
 routes.delete('/products', ProductController.delete)
+routes.patch('/products', ProductController.update)
 
 export default routes

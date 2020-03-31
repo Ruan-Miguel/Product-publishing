@@ -66,6 +66,28 @@ class ProductController {
       })
       .catch(({ message }: Error) => res.status(400).json(message))
   }
+
+  public async update (req: Request, res: Response): Promise<Response> {
+    const { userId, productId, ...information } = req.body
+
+    const providedProps = Object.keys(information)
+
+    const upgradeableProps = ['categories', 'description', 'image', 'price']
+
+    if (productId && providedProps.length !== 0 && providedProps.every((providedProp) => upgradeableProps.includes(providedProp))) {
+      return Product.updateOne({ _id: productId, owner: userId }, information, { runValidators: true })
+        .then((updated) => {
+          if (updated.n !== 0) {
+            return res.send()
+          }
+
+          return res.status(400).json('this product does not exist')
+        })
+        .catch(({ message }: Error) => res.status(400).json(message))
+    }
+
+    return res.status(400).json('the set of properties provided is not acceptable')
+  }
 }
 
 export default new ProductController()
