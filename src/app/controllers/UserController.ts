@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import { Error } from 'mongoose'
 
 import User from '../models/User'
+import Product from '../models/Product'
 import authConfig from '../config/auth.json'
 
 class UserController {
@@ -80,10 +81,15 @@ class UserController {
   public async delete (req: Request, res: Response): Promise<Response> {
     const id = req.body.userId
 
-    return User.findByIdAndDelete(id)
+    return Product.deleteMany({ owner: id })
       .then(() => {
-        return res.send()
+        return User.findByIdAndDelete(id)
+          .then(() => {
+            return res.send()
+          })
+          .catch(({ message }: Error) => res.status(400).json(message))
       })
+      .catch(({ message }: Error) => res.status(400).json(message))
   }
 }
 
