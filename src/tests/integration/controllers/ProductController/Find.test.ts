@@ -155,7 +155,7 @@ describe('Testing product research routes', () => {
         page: 1,
         limit: 10,
         searchParam: 'owner',
-        searchValue: faker.random.word()
+        searchValue: 'pro'
       })
 
     chai.expect(res.status).to.be.equal(400)

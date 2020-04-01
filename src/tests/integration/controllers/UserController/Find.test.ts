@@ -82,7 +82,7 @@ describe('Testing user research routes', () => {
       .get('/users')
       .query({
         searchParam: '_id',
-        searchValue: faker.random.word(),
+        searchValue: 'pro',
         page: 1,
         limit: 10
       })

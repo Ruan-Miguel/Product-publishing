@@ -17,8 +17,14 @@ const productSchema = new Schema({
   categories: {
     type: [String],
     validate: {
-      message: 'Path `categories` is required',
-      validator: (categories: Array<string>): boolean => categories.length !== 0
+      message: 'Path `categories` is wrong',
+      validator: (categories: Array<string>): boolean => {
+        if (categories.length !== 0) {
+          return categories.every(category => category.length !== 0)
+        }
+
+        return false
+      }
     }
   },
   description: {
