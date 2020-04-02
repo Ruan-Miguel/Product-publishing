@@ -48,34 +48,43 @@ class UserController {
   }
 
   public async find (req: Request, res: Response): Promise<Response> {
-    const { searchParam, page, limit } = req.query
+    const { page, limit, ...searchParams } = req.query
 
-    let { searchValue } = req.query
-
-    if (searchParam && searchValue) {
+    if (Object.keys(searchParams).length !== 0) {
       const searchableParameters = ['_id', 'name', 'email']
 
-      if (searchableParameters.some((parameter) => parameter === searchParam)) {
-        if (searchParam === '_id') {
-          return User.findById(searchValue)
+      const searchParamsKeys = Object.keys(searchParams)
+      const searchParamsValues = Object.values(searchParams)
+
+      if (searchParamsKeys.every((searchParamsKey) => searchableParameters.includes(searchParamsKey)) && searchParamsValues.every((searchParamsValue) => typeof searchParamsValue === 'string')) {
+        if (searchParams._id) {
+          return User.findById(searchParams._id)
             .then((user) => res.json(user))
             .catch((err: Error) => res.status(400).json(err.message))
-        } else {
-          searchValue = searchValue.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
-
-          return User.paginate(
-            { [searchParam]: { $regex: new RegExp(searchValue, 'i') } },
-            { page, limit }
-          )
-            .then((users) => res.json(users))
         }
+
+        let searchParamsArray = Object.entries(searchParams)
+
+        searchParamsArray = searchParamsArray.map((pair) => [pair[0], (pair[1] as string).replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)])
+
+        searchParamsArray = searchParamsArray.map((pair) => [pair[0], { $regex: new RegExp((pair[1] as string), 'i') }])
+
+        searchParamsArray.forEach((pair) => {
+          searchParams[pair[0]] = pair[1]
+        })
+
+        return User.paginate(
+          searchParams,
+          { page, limit }
+        )
+          .then((users) => res.json(users))
       }
 
-      return res.status(400).json('an unrecognized searchParam was provided')
-    } else {
-      return User.paginate({}, { page, limit })
-        .then((users) => res.json(users))
+      return res.status(400).json('there is a problem with the search parameters')
     }
+
+    return User.paginate({}, { page, limit })
+      .then((users) => res.json(users))
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {
