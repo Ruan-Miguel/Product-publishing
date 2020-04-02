@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { Error } from 'mongoose'
+import { Error, PaginateResult } from 'mongoose'
 
-import User from '../models/User'
+import User, { UserInterface } from '../models/User'
 import Product from '../models/Product'
 import authConfig from '../config/auth.json'
 
@@ -47,44 +47,65 @@ class UserController {
     return res.status(400).json('incorrect email or password')
   }
 
-  public async find (req: Request, res: Response): Promise<Response> {
+  private async paginateAbstraction (page: number, limit: number, searchParams: object = {}): Promise<PaginateResult<UserInterface>> {
+    return User.paginate(searchParams, { page, limit })
+  }
+
+  private validateSearchParams (searchParams: object): boolean {
+    const searchableParameters = ['_id', 'name', 'email']
+
+    const searchParamsKeys = Object.keys(searchParams)
+    const searchParamsValues = Object.values(searchParams)
+
+    const correctStructure = searchParamsKeys.every((searchParamsKey) => searchableParameters.includes(searchParamsKey))
+
+    const correctTypes = searchParamsValues.every((searchParamsValue) => typeof searchParamsValue === 'string')
+
+    return correctStructure && correctTypes
+  }
+
+  private treatmentOfSearchParams (searchParams: { _id: string; name: string; email: string}): { [param: string]: object } {
+    let searchParamsArray = Object.entries(searchParams)
+
+    searchParamsArray = searchParamsArray.map((pair) => [pair[0], (pair[1] as string).replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)])
+
+    const treatedParamsArray: [string, object][] = []
+
+    searchParamsArray.forEach((pair) => {
+      treatedParamsArray.push([pair[0], { $regex: new RegExp((pair[1] as string), 'i') }])
+    })
+
+    const treatedParams: {
+      [param: string]: object;
+    } = {}
+
+    treatedParamsArray.forEach((pair) => {
+      treatedParams[pair[0]] = pair[1]
+    })
+
+    return treatedParams
+  }
+
+  public find = async (req: Request, res: Response): Promise<Response> => {
     const { page, limit, ...searchParams } = req.query
 
-    if (Object.keys(searchParams).length !== 0) {
-      const searchableParameters = ['_id', 'name', 'email']
+    if (Object.keys(searchParams).length === 0) {
+      return res.json(await this.paginateAbstraction(page, limit))
+    }
 
-      const searchParamsKeys = Object.keys(searchParams)
-      const searchParamsValues = Object.values(searchParams)
-
-      if (searchParamsKeys.every((searchParamsKey) => searchableParameters.includes(searchParamsKey)) && searchParamsValues.every((searchParamsValue) => typeof searchParamsValue === 'string')) {
-        if (searchParams._id) {
-          return User.findById(searchParams._id)
-            .then((user) => res.json(user))
-            .catch((err: Error) => res.status(400).json(err.message))
-        }
-
-        let searchParamsArray = Object.entries(searchParams)
-
-        searchParamsArray = searchParamsArray.map((pair) => [pair[0], (pair[1] as string).replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)])
-
-        searchParamsArray = searchParamsArray.map((pair) => [pair[0], { $regex: new RegExp((pair[1] as string), 'i') }])
-
-        searchParamsArray.forEach((pair) => {
-          searchParams[pair[0]] = pair[1]
-        })
-
-        return User.paginate(
-          searchParams,
-          { page, limit }
-        )
-          .then((users) => res.json(users))
-      }
-
+    if (!this.validateSearchParams(searchParams)) {
       return res.status(400).json('there is a problem with the search parameters')
     }
 
-    return User.paginate({}, { page, limit })
-      .then((users) => res.json(users))
+    if (searchParams._id) {
+      return User.findById(searchParams._id)
+        .then((user) => res.json(user))
+        .catch((err: Error) => res.status(400).json(err.message))
+    }
+
+    const treatedParams = this.treatmentOfSearchParams(searchParams)
+
+    return res.json(await this.paginateAbstraction(page, limit, treatedParams))
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {

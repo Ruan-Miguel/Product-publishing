@@ -2,7 +2,7 @@ import { Schema, model, Document, PaginateModel } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import bcrypt from 'bcrypt'
 
-interface UserInterface extends Document {
+export interface UserInterface extends Document {
     name: string;
     email: string;
     password: string;
