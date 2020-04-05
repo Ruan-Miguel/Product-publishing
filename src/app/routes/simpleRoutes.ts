@@ -9,6 +9,6 @@ routes.get('/users', UserController.find)
 routes.post('/users', UserController.create)
 routes.post('/users/login', UserController.login)
 
-routes.get('/products', ProductController.findByName)
+routes.get('/products', ProductController.find)
 
 export default routes

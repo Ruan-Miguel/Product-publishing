@@ -55,13 +55,10 @@ class UserController {
     const searchableParameters = ['_id', 'name', 'email']
 
     const searchParamsKeys = Object.keys(searchParams)
-    const searchParamsValues = Object.values(searchParams)
 
     const correctStructure = searchParamsKeys.every((searchParamsKey) => searchableParameters.includes(searchParamsKey))
 
-    const correctTypes = searchParamsValues.every((searchParamsValue) => typeof searchParamsValue === 'string')
-
-    return correctStructure && correctTypes
+    return correctStructure
   }
 
   private treatmentOfSearchParams (searchParams: { _id: string; name: string; email: string}): { [param: string]: object } {
@@ -93,14 +90,14 @@ class UserController {
       return res.json(await this.paginateAbstraction(page, limit))
     }
 
-    if (!this.validateSearchParams(searchParams)) {
-      return res.status(400).json('there is a problem with the search parameters')
-    }
-
     if (searchParams._id) {
       return User.findById(searchParams._id)
         .then((user) => res.json(user))
         .catch((err: Error) => res.status(400).json(err.message))
+    }
+
+    if (!this.validateSearchParams(searchParams)) {
+      return res.status(400).json('there is a problem with the search parameters')
     }
 
     const treatedParams = this.treatmentOfSearchParams(searchParams)
@@ -117,9 +114,7 @@ class UserController {
           .then(() => {
             return res.send()
           })
-          .catch(({ message }: Error) => res.status(400).json(message))
       })
-      .catch(({ message }: Error) => res.status(400).json(message))
   }
 }
 

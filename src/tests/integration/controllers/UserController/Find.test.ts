@@ -224,4 +224,16 @@ describe('Testing user research routes', () => {
 
     chai.expect(res.status).to.be.equal(400)
   })
+
+  it('Should fail because provides an invalid property', async () => {
+    const res = await chai.request(app)
+      .get('/users')
+      .query({
+        page: 1,
+        limit: 10,
+        dateOfBirth: dateOfBirth1
+      })
+
+    chai.expect(res.status).to.be.equal(400)
+  })
 })

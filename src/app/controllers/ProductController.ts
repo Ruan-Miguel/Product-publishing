@@ -15,42 +15,58 @@ class ProductController {
       .catch(({ message }: Error) => res.status(400).json(message))
   }
 
-  public async findByName (req: Request, res: Response): Promise<Response> {
-    const { searchParam, page, limit } = req.query
+  private validateSearchParams (searchParams: object): boolean {
+    const searchableParameters = ['_id', 'owner', 'name', 'categories', 'maxPrice']
 
-    let { searchValue } = req.query
+    const searchParamsKeys = Object.keys(searchParams)
 
-    if (searchParam && searchValue) {
-      const searchableParameters = ['_id', 'name', 'categories', 'owner']
+    const correctStructure = searchParamsKeys.every((searchParamsKey) => searchableParameters.includes(searchParamsKey))
 
-      if (searchableParameters.some((parameter) => parameter === searchParam)) {
-        if (searchParam === '_id') {
-          return Product.findById(searchValue)
-            .then((product) => res.json(product))
-            .catch((err: Error) => res.status(400).json(err.message))
-        } else if (searchParam === 'owner') {
-          return Product.paginate(
-            { owner: searchValue },
-            { page, limit, populate: 'owner' }
-          )
-            .then((products) => res.json(products))
-            .catch((err: Error) => res.status(400).json(err.message))
-        } else {
-          searchValue = searchValue.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+    return correctStructure
+  }
 
-          return Product.paginate(
-            { [searchParam]: { $regex: new RegExp(searchValue, 'i') } },
-            { page, limit, populate: 'owner' }
-          )
-            .then((products) => res.json(products))
-        }
-      }
+  private treatmentOfSearchParams (searchParams: { name?: string; maxPrice?: string}): object {
+    const newProperties: {
+      [property: string]: object;
+    } = {}
 
-      return res.status(400).json('an unrecognized searchParam was provided')
-    } else {
-      return Product.paginate({}, { page, limit, populate: 'owner' })
-        .then((users) => res.json(users))
+    if (searchParams.name) {
+      const noSpecialChars = searchParams.name.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
+
+      newProperties.name = { $regex: new RegExp(noSpecialChars, 'i') }
     }
+
+    if (searchParams.maxPrice) {
+      newProperties.price = { $lt: parseFloat(searchParams.maxPrice) }
+
+      delete searchParams.maxPrice
+    }
+
+    Object.assign(searchParams, newProperties)
+
+    return searchParams
+  }
+
+  public find = async (req: Request, res: Response): Promise<Response> => {
+    const { page, limit, ...searchParams } = req.query
+
+    if (Object.keys(searchParams).length === 0) {
+      return res.json(await Product.paginate({}, { page, limit, populate: 'owner' }))
+    }
+
+    if (searchParams._id) {
+      return Product.findById(searchParams._id)
+        .then((product) => res.json(product))
+        .catch((err: Error) => res.status(400).json(err.message))
+    }
+
+    if (!this.validateSearchParams(searchParams)) {
+      return res.status(400).json('there is a problem with the search parameters')
+    }
+
+    const treatedParams = this.treatmentOfSearchParams(searchParams)
+
+    return res.json(await Product.paginate(treatedParams, { page, limit, populate: 'owner' }))
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {
