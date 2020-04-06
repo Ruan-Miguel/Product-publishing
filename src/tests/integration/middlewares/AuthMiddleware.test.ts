@@ -1,10 +1,12 @@
 import chai from 'chai'
 import { describe, it, beforeEach } from 'mocha'
 import chaiHttp from 'chai-http'
+import jwt from 'jsonwebtoken'
 
 import app from '../../../app/app'
 import ObjectGenerator from '../../utils/ObjectGenerator'
 import ClearDatabase from '../../utils/ClearDatabase'
+import authConfig from '../../../app/config/auth.json'
 
 chai.use(chaiHttp)
 
@@ -68,6 +70,30 @@ describe('Authentication middleware testing', () => {
     const res = await chai.request(app)
       .delete('/users')
       .set('Authorization', 'Bearer ' + token)
+
+    chai.expect(res.status).to.be.equal(401)
+  })
+
+  it('Should fail because provides a token without id', async () => {
+    const fakeToken = jwt.sign({ identifier: 'pro' }, authConfig.secret, {
+      expiresIn: 86400
+    })
+
+    const res = await chai.request(app)
+      .delete('/users')
+      .set('Authorization', 'Bearer ' + fakeToken)
+
+    chai.expect(res.status).to.be.equal(401)
+  })
+
+  it('Should fail because provides a token with an unacceptable id', async () => {
+    const fakeToken = jwt.sign({ id: 'pro' }, authConfig.secret, {
+      expiresIn: 86400
+    })
+
+    const res = await chai.request(app)
+      .delete('/users')
+      .set('Authorization', 'Bearer ' + fakeToken)
 
     chai.expect(res.status).to.be.equal(401)
   })

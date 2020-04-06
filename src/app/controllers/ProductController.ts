@@ -11,7 +11,7 @@ class ProductController {
       ...rest,
       owner: userId
     })
-      .then(() => res.status(201).send())
+      .then(({ _id }) => res.status(201).json(_id))
       .catch(({ message }: Error) => res.status(400).json(message))
   }
 
@@ -31,9 +31,7 @@ class ProductController {
     } = {}
 
     if (searchParams.name) {
-      const noSpecialChars = searchParams.name.replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)
-
-      newProperties.name = { $regex: new RegExp(noSpecialChars, 'i') }
+      newProperties.name = { $regex: new RegExp(searchParams.name, 'i') }
     }
 
     if (searchParams.maxPrice) {
@@ -55,7 +53,7 @@ class ProductController {
     }
 
     if (searchParams._id) {
-      return Product.findById(searchParams._id)
+      return Product.findById(searchParams._id).populate('owner')
         .then((product) => res.json(product))
         .catch((err: Error) => res.status(400).json(err.message))
     }
@@ -66,7 +64,9 @@ class ProductController {
 
     const treatedParams = this.treatmentOfSearchParams(searchParams)
 
-    return res.json(await Product.paginate(treatedParams, { page, limit, populate: 'owner' }))
+    return Product.paginate(treatedParams, { page, limit, populate: 'owner' })
+      .then((product) => res.json(product))
+      .catch(({ message }: Error) => res.status(400).json(message))
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {

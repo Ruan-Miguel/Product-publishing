@@ -208,7 +208,7 @@ describe('Testing product update routes', () => {
       .patch('/products')
       .set('Authorization', 'Bearer ' + token)
       .send({
-        productId: productId.slice(0, productId.length - 1) + 'a',
+        productId: productId.replace(/.$/, (letter) => (letter === 'a') ? 'b' : 'a'),
         image: faker.image.imageUrl(),
         description: faker.lorem.sentences()
       })
