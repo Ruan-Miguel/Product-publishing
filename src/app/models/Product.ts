@@ -1,7 +1,7 @@
 import { Schema, model, Document, PaginateModel } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 
-interface ProductInterface extends Document {
+export interface ProductInterface extends Document {
     name: string;
     email: string;
     password: string;

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { Error } from 'mongoose'
+import { Error, PaginateResult } from 'mongoose'
 
-import Product from '../models/Product'
+import Product, { ProductInterface } from '../models/Product'
 
 class ProductController {
   public async create (req: Request, res: Response): Promise<Response> {
@@ -13,6 +13,10 @@ class ProductController {
     })
       .then(({ _id }) => res.status(201).json(_id))
       .catch(({ message }: Error) => res.status(400).json(message))
+  }
+
+  private async paginateAbstraction (page = 1, limit = 10, searchParams: object = {}): Promise<PaginateResult<ProductInterface>> {
+    return Product.paginate(searchParams, { page, limit, populate: 'owner' })
   }
 
   private validateSearchParams (searchParams: object): boolean {
@@ -49,7 +53,7 @@ class ProductController {
     const { page, limit, ...searchParams } = req.query
 
     if (Object.keys(searchParams).length === 0) {
-      return res.json(await Product.paginate({}, { page, limit, populate: 'owner' }))
+      return res.json(await this.paginateAbstraction(page, limit))
     }
 
     if (searchParams._id) {
@@ -64,9 +68,11 @@ class ProductController {
 
     const treatedParams = this.treatmentOfSearchParams(searchParams)
 
-    return Product.paginate(treatedParams, { page, limit, populate: 'owner' })
-      .then((product) => res.json(product))
-      .catch(({ message }: Error) => res.status(400).json(message))
+    try {
+      return res.json(await this.paginateAbstraction(page, limit, treatedParams))
+    } catch (e) {
+      return res.status(400).json(e.message)
+    }
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {

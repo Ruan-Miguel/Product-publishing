@@ -47,7 +47,7 @@ class UserController {
     return res.status(400).json('incorrect email or password')
   }
 
-  private async paginateAbstraction (page: number, limit: number, searchParams: object = {}): Promise<PaginateResult<UserInterface>> {
+  private async paginateAbstraction (page = 1, limit = 10, searchParams: object = {}): Promise<PaginateResult<UserInterface>> {
     return User.paginate(searchParams, { page, limit })
   }
 
