@@ -215,7 +215,7 @@ POST http://localhost:8080/products
   <tr>
     <td>price</td>
     <td>Required</td>
-    <td>unsigned number</td>
+    <td>número real positivo</td>
   </tr>
   <tr>
     <td>image</td>
@@ -285,7 +285,85 @@ GET http://localhost:8080/products
   <tr>
     <td>maxPrice</td>
     <td>Optional</td>
-    <td>positive floats</td>
+    <td>números reais positivos</td>
     <td>Caso este parâmetro seja informado, será feita uma busca por produtos q possuam preço menor que este</td>
+  </tr>
+</table>
+
+<br/>
+
+- ### Atualização de produto
+
+Atualiza as propriedades do produto informado
+
+#### URL
+
+PTCH http://localhost:8080/products
+
+#### Informações
+
+<table>
+  <tr>
+    <td>Requer autenticação?</td>
+    <td>Sim</td>
+  </tr>
+</table>
+
+#### Parâmetros
+
+<table>
+  <tr>
+    <td>productId</td>
+    <td>Required</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>description</td>
+    <td>Optional</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>categories</td>
+    <td>Optional</td>
+    <td>array de string</td>
+  </tr>
+  <tr>
+    <td>price</td>
+    <td>Optional</td>
+    <td>número real positivo</td>
+  </tr>
+  <tr>
+    <td>image</td>
+    <td>Optional</td>
+    <td>string</td>
+  </tr>
+</table>
+
+<br/>
+
+- ### Remoção de produto
+
+Remove o produto informado do banco de dados
+
+#### URL
+
+DEL http://localhost:8080/products
+
+#### Informações
+
+<table>
+  <tr>
+    <td>Requer autenticação?</td>
+    <td>Sim</td>
+  </tr>
+</table>
+
+#### Parâmetros
+
+<table>
+  <tr>
+    <td>productId</td>
+    <td>Required</td>
+    <td>string</td>
   </tr>
 </table>
