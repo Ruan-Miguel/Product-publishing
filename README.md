@@ -20,6 +20,10 @@ Executa os testes da API
 
 Mostra a cobertura do código pelos testes
 
+## Autentição
+
+As rotas dessa API que requerem autenticação utilizam de tokens jwt
+
 ## Rotas
 
 - ### Criação de usuário
