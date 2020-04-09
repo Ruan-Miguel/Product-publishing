@@ -3,38 +3,31 @@ import { describe, it, before } from 'mocha'
 import chaiHttp from 'chai-http'
 
 import app from '../../../../app/app'
-import ObjectGenerator from '../../../utils/ObjectGenerator'
 import ClearDatabase from '../../../utils/ClearDatabase'
+import factory, { UserInterface } from '../../../utils/factories'
 
 chai.use(chaiHttp)
 
 describe('Testing user research routes', () => {
-  const name1 = 'Person One'
-  const email1 = 'person_one@gmail.com'
-  let dateOfBirth1: string
+  const user1 = {
+    name: 'Person One',
+    email: 'person_one@gmail.com',
+    dateOfBirth: ''
+  }
 
-  const name2 = 'Person Two'
-  const email2 = 'person_two@gmail.com'
+  const user2 = {
+    name: 'Person Two',
+    email: 'person_two@gmail.com'
+  }
 
   before(async () => {
     await ClearDatabase.clearUsers()
 
-    const user1 = ObjectGenerator.userCreation({ name: name1, email: email1 })
+    const { dateOfBirth } = await factory.create<UserInterface>('User', { name: user1.name, email: user1.email })
 
-    const user2 = ObjectGenerator.userCreation({ name: name2, email: email2 })
+    await factory.create<UserInterface>('User', { name: user2.name, email: user2.email })
 
-    if (user1.dateOfBirth) {
-      ({ dateOfBirth: dateOfBirth1 } = user1)
-    }
-
-    return Promise.all([
-      chai.request(app)
-        .post('/users')
-        .send(user1),
-      chai.request(app)
-        .post('/users')
-        .send(user2)
-    ])
+    user1.dateOfBirth = dateOfBirth.toISOString().slice(0, 10)
   })
 
   it('Should return the first page', async () => {
@@ -73,94 +66,94 @@ describe('Testing user research routes', () => {
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(2)
   })
 
-  it('Should return the user regarding name1', async () => {
+  it('Should return the user regarding name', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
         page: 1,
         limit: 2,
-        name: name1
+        name: user1.name
       })
 
     chai.expect(res.status).to.be.equal(200)
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
   })
 
-  it('Should return the user referring to name1 with capital letters', async () => {
+  it('Should return the user referring to name with capital letters', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
         page: 1,
         limit: 2,
-        name: name1
+        name: user1.name
       })
 
     chai.expect(res.status).to.be.equal(200)
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
   })
 
-  it('Should return the user regarding email1', async () => {
+  it('Should return the user regarding email', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
         page: 1,
         limit: 2,
-        email: email1
+        email: user1.email
       })
 
     chai.expect(res.status).to.be.equal(200)
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
   })
 
-  it('Should return the user referring to email1 with capital letters', async () => {
+  it('Should return the user referring to email with capital letters', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
         page: 1,
         limit: 2,
-        email: email1
+        email: user1.email
       })
 
     chai.expect(res.status).to.be.equal(200)
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
   })
 
-  it('Should return the user regarding name1 and email1', async () => {
+  it('Should return the user regarding name and email', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
         page: 1,
         limit: 2,
-        name: name1,
-        email: email1
+        name: user1.name,
+        email: user1.email
       })
 
     chai.expect(res.status).to.be.equal(200)
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
   })
 
-  it('Should not return a user because there is no user with the name1 and email2', async () => {
+  it('Should not return a user because there is no user with the name and email', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
         page: 1,
         limit: 2,
-        name: name1,
-        email: email2
+        name: user1.name,
+        email: user2.email
       })
 
     chai.expect(res.status).to.be.equal(200)
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(0)
   })
 
-  it('Should not return a user because there is no user with the name2 and email1', async () => {
+  it('Should not return a user because there is no user with the name and email', async () => {
     const res = await chai.request(app)
       .get('/users')
       .query({
         page: 1,
         limit: 2,
-        name: name2,
-        email: email1
+        name: user2.name,
+        email: user1.email
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -202,8 +195,8 @@ describe('Testing user research routes', () => {
       .query({
         page: 36,
         limit: 50,
-        name: name2,
-        email: email1,
+        name: user2.name,
+        email: user1.email,
         _id: id
       })
 
@@ -217,8 +210,8 @@ describe('Testing user research routes', () => {
       .query({
         page: 36,
         limit: 50,
-        name: name2,
-        email: email1,
+        name: user2.name,
+        email: user1.email,
         _id: 'pro'
       })
 
@@ -231,7 +224,7 @@ describe('Testing user research routes', () => {
       .query({
         page: 1,
         limit: 10,
-        dateOfBirth: dateOfBirth1
+        dateOfBirth: user1.dateOfBirth
       })
 
     chai.expect(res.status).to.be.equal(400)

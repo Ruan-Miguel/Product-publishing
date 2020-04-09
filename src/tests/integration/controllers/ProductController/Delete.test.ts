@@ -6,39 +6,41 @@ import faker from 'faker'
 import app from '../../../../app/app'
 import ObjectGenerator from '../../../utils/ObjectGenerator'
 import ClearDatabase from '../../../utils/ClearDatabase'
+import factory, { UserInterface, ProductInterface } from '../../../utils/factories'
 
 chai.use(chaiHttp)
 
 describe('Product removal routes tests', () => {
   let token: string
+  let userId: string
   let productId: string
 
   before(async () => {
     await ClearDatabase.clearAll()
 
-    const { text } = await chai.request(app)
-      .post('/users')
-      .send(ObjectGenerator.userCreation())
+    const password = faker.internet.password()
 
+    const { id, email } = await factory.create<UserInterface>('User', { password })
+
+    const { text } = await chai.request(app)
+      .post('/users/login')
+      .send({
+        email,
+        password
+      })
+
+    userId = id
     token = JSON.parse(text)
   })
 
   beforeEach(async () => {
     await ClearDatabase.clearProducts()
 
-    await chai.request(app)
-      .post('/products')
-      .set('Authorization', 'Bearer ' + token)
-      .send(ObjectGenerator.productCreation())
+    const { id } = await factory.create<ProductInterface>('Product', {
+      owner: userId
+    })
 
-    const { body } = await chai.request(app)
-      .get('/products')
-      .query({
-        page: 1,
-        limit: 1
-      })
-
-    productId = body.docs[0]._id
+    productId = id
   })
 
   it('Should delete the product', async () => {
@@ -57,7 +59,7 @@ describe('Product removal routes tests', () => {
       .delete('/products')
       .set('Authorization', 'Bearer ' + token)
       .send({
-        productId: faker.random.word()
+        productId: 'pro'
       })
 
     chai.expect(res.status).to.be.equal(400)
