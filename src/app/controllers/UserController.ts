@@ -22,7 +22,7 @@ class UserController {
     }
 
     return User.create(newUser)
-      .then(({ _id: id }: { _id: string }) => {
+      .then(({ _id: id }) => {
         const token = this.generateToken(id)
         return res.status(201).json(token)
       })

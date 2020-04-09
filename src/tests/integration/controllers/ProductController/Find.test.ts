@@ -4,78 +4,40 @@ import chaiHttp from 'chai-http'
 import faker from 'faker'
 
 import app from '../../../../app/app'
-import ObjectGenerator from '../../../utils/ObjectGenerator'
 import ClearDatabase from '../../../utils/ClearDatabase'
+import factory, { UserInterface, ProductInterface } from '../../../utils/factories'
 
 chai.use(chaiHttp)
 
 describe('Testing product research routes', () => {
-  type ProductInterface = {
-    _id: string;
-    owner: string;
-    name: string;
-    categories: string[];
-    price: number;
-}
-
-  const product1: ProductInterface = {
-    _id: '',
-    owner: '',
-    name: 'boneca',
-    categories: ['brinquedo', 'embalado'],
-    price: 49.99
-  }
-
-  const product2: ProductInterface = {
-    _id: '',
-    owner: '',
-    name: 'boneco',
-    categories: ['brinquedo', 'não embalado'],
-    price: 39.99
-  }
+  let product1: ProductInterface
+  let product2: ProductInterface
 
   before(async () => {
     await ClearDatabase.clearAll()
 
-    const createProducts = async (product: ProductInterface): Promise<void> => {
-      const { text: token } = await chai.request(app)
-        .post('/users')
-        .send(ObjectGenerator.userCreation())
+    const products = [
+      {
+        name: 'boneca',
+        categories: ['brinquedo', 'embalado'],
+        price: 49.99
+      },
+      {
+        name: 'boneco',
+        categories: ['brinquedo', 'não embalado'],
+        price: 39.99
+      }]
 
-      await chai.request(app)
-        .post('/products')
-        .set('Authorization', 'Bearer ' + JSON.parse(token))
-        .send(ObjectGenerator.productCreation({
-          name: product.name,
-          categories: product.categories,
-          price: product.price
-        }))
-    }
+    const users = await factory.createMany<UserInterface>('User', products.length);
 
-    const getProducts = async (product: ProductInterface): Promise<void> => {
-      const { text } = await chai.request(app)
-        .get('/products')
-        .query({
-          page: 1,
-          limit: 1,
-          name: product.name
-        })
-
-      const dbProduct = JSON.parse(text).docs[0]
-
-      product._id = dbProduct._id
-      product.owner = dbProduct.owner._id
-    }
-
-    await Promise.all([
-      createProducts(product1),
-      createProducts(product2)
-    ])
-
-    await Promise.all([
-      getProducts(product1),
-      getProducts(product2)
-    ])
+    [product1, product2] = await Promise.all(users.map(({ _id }, index) => {
+      return factory.create<ProductInterface>('Product', {
+        owner: _id,
+        name: products[index].name,
+        categories: products[index].categories,
+        price: products[index].price
+      })
+    }))
   })
 
   it('Should return all products', async () => {
@@ -169,11 +131,11 @@ describe('Testing product research routes', () => {
     const res = await chai.request(app)
       .get('/products')
       .query({
-        _id: product1._id
+        _id: product1.id
       })
 
     chai.expect(res.status).to.be.equal(200)
-    chai.expect(JSON.parse(res.text)._id).to.be.equal(product1._id)
+    chai.expect(JSON.parse(res.text)._id).to.be.equal(product1.id)
   })
 
   it('Should fail because provides a unacceptable _id', async () => {
@@ -192,7 +154,7 @@ describe('Testing product research routes', () => {
       .query({
         page: 1,
         limit: 10,
-        owner: product1.owner
+        owner: product1.owner.toString()
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -257,21 +219,7 @@ describe('Testing product research routes', () => {
         page: 1,
         limit: 10,
         name: product1.name,
-        owner: product1.owner
-      })
-
-    chai.expect(res.status).to.be.equal(200)
-    chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
-  })
-
-  it('Should return product1 because of your name and owner', async () => {
-    const res = await chai.request(app)
-      .get('/products')
-      .query({
-        page: 1,
-        limit: 10,
-        name: product1.name,
-        owner: product1.owner
+        owner: product1.owner.toString()
       })
 
     chai.expect(res.status).to.be.equal(200)

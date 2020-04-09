@@ -3,9 +3,11 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 
 export interface ProductInterface extends Document {
     name: string;
-    email: string;
-    password: string;
-    dateOfBirth: Date;
+    categories: string[];
+    description: string;
+    image: string;
+    price: number;
+    owner: string;
 }
 
 const productSchema = new Schema({
