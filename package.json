@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon src/app/server.ts",
+    "dev": "nodemon src/server.ts",
     "test": "mocha --exit -r ts-node/register tests/**/*.test.ts",
     "cover": "nyc yarn test"
   },

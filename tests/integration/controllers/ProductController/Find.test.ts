@@ -3,7 +3,7 @@ import { describe, it, before } from 'mocha'
 import chaiHttp from 'chai-http'
 import faker from 'faker'
 
-import app from '../../../../src/app/app'
+import app from '../../../../src/app'
 import ClearDatabase from '../../../utils/ClearDatabase'
 import factory, { UserInterface, ProductInterface } from '../../../utils/factories'
 

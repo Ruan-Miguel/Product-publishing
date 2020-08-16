@@ -1,11 +1,11 @@
 import factory from 'factory-girl'
 import faker from 'faker'
 
-import User from '../../src/app/models/User'
-import Product from '../../src/app/models/Product'
+import User from '../../src/models/User'
+import Product from '../../src/models/Product'
 
-export { UserInterface } from '../../src/app/models/User'
-export { ProductInterface } from '../../src/app/models/Product'
+export { UserInterface } from '../../src/models/User'
+export { ProductInterface } from '../../src/models/Product'
 
 factory.define('User', User, () => ({
   name: faker.name.findName(),

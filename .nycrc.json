@@ -3,13 +3,13 @@
     ".ts"
   ],
   "include": [
-    "src/app/**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
-    "src/app/server.ts",
-    "src/app/app.ts",
-    "src/app/routes/**",
-    "src/app/schemas/**"
+    "src/server.ts",
+    "src/app.ts",
+    "src/routes/**",
+    "src/schemas/**"
   ],
   "reporter": [
     "text",
