@@ -1,50 +1,20 @@
 import { Request, Response } from 'express'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
 import { Error, PaginateResult } from 'mongoose'
 
 import User, { UserInterface } from '../models/User'
-import Product from '../models/Product'
-import authConfig from '../config/auth.json'
+import UserService from '../services/UserService'
 
 class UserController {
-  private generateToken (id: string): string {
-    return jwt.sign({ id }, authConfig.secret, {
-      expiresIn: 86400
-    })
-  }
-
-  public create = async (req: Request, res: Response): Promise<Response> => {
-    const newUser = req.body
-
-    if (newUser._id) {
-      return res.status(400).json('You can not specify your Id')
-    }
-
-    return User.create(newUser)
-      .then(({ _id: id }) => {
-        const token = this.generateToken(id)
-        return res.status(201).json(token)
-      })
-      .catch((err: Error) => res.status(400).json(err.message))
+  public async create (req: Request, res: Response): Promise<Response> {
+    return UserService.create(req.body)
+      .then(token => res.status(201).json(token))
+      .catch(err => res.status(400).json(err.message))
   }
 
   public login = async (req: Request, res: Response): Promise<Response> => {
-    const { email, password }: { email: string; password: string } = req.body
-
-    if (!email || !password) {
-      return res.status(400).json('no email or password provided')
-    }
-
-    const user = await User.findOne({ email: email }, { password: true })
-
-    if (user && await bcrypt.compare(password, user.password)) {
-      const token = this.generateToken(user._id)
-
-      return res.json(token)
-    }
-
-    return res.status(400).json('incorrect email or password')
+    return UserService.login(req.body)
+      .then(token => res.status(200).json(token))
+      .catch(err => res.status(400).json(err.message))
   }
 
   private async paginateAbstraction (page = 1, limit = 10, searchParams: object = {}): Promise<PaginateResult<UserInterface>> {
@@ -106,15 +76,9 @@ class UserController {
   }
 
   public async delete (req: Request, res: Response): Promise<Response> {
-    const id = req.body.userId
-
-    return Product.deleteMany({ owner: id })
-      .then(() => {
-        return User.findByIdAndDelete(id)
-          .then(() => {
-            return res.send()
-          })
-      })
+    return UserService.delete(req.body)
+      .then(() => res.status(200).send())
+      .catch(err => res.status(400).json(err.message))
   }
 }
 
