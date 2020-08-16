@@ -3,10 +3,10 @@ import { describe, it, beforeEach } from 'mocha'
 import chaiHttp from 'chai-http'
 import jwt from 'jsonwebtoken'
 
-import app from '../../../app/app'
+import app from '../../../src/app/app'
 import ObjectGenerator from '../../utils/ObjectGenerator'
 import ClearDatabase from '../../utils/ClearDatabase'
-import authConfig from '../../../app/config/auth.json'
+import authConfig from '../../../src/app/config/auth.json'
 
 chai.use(chaiHttp)
 

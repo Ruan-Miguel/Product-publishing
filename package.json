@@ -4,8 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
     "dev": "nodemon src/app/server.ts",
-    "test": "mocha --exit -r ts-node/register src/tests/**/*.test.ts",
+    "test": "mocha --exit -r ts-node/register tests/**/*.test.ts",
     "cover": "nyc yarn test"
   },
   "devDependencies": {

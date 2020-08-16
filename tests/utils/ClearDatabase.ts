@@ -1,5 +1,5 @@
-import UserModel from '../../app/models/User'
-import ProductModel from '../../app/models/Product'
+import UserModel from '../../src/app/models/User'
+import ProductModel from '../../src/app/models/Product'
 
 class ClearDatabase {
   public static async clearUsers (): Promise<void> {
