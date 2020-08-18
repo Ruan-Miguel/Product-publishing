@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { Error } from 'mongoose'
+import { Error, PaginateResult } from 'mongoose'
 
-import User from '../models/User'
+import User, { UserInterface } from '../models/User'
 import Product from '../models/Product'
 import authConfig from '../config/auth.json'
 
@@ -20,7 +20,7 @@ class UserService {
 
     return User.create(newUser)
       .then(({ _id: id }) => {
-        const token = UserService.generateToken(id)
+        const token = this.generateToken(id)
 
         return token
       })
@@ -40,7 +40,7 @@ class UserService {
     const user = await User.findOne({ email: email }, { password: true })
 
     if (user && await bcrypt.compare(password, user.password)) {
-      const token = UserService.generateToken(user._id)
+      const token = this.generateToken(user._id)
 
       return token
     }
@@ -48,61 +48,58 @@ class UserService {
     throw new Error('incorrect email or password')
   }
 
-  /* private async paginateAbstraction (page = 1, limit = 10, searchParams: object = {}): Promise<PaginateResult<UserInterface>> {
-    return User.paginate(searchParams, { page, limit })
-  } */
+  private static treatAccents (words: string): string {
+    words = words.replace(/a|[à-å]/gi, '(?:a|[à-å])')
 
-  /* private validateSearchParams (searchParams: object): boolean {
-    const searchableParameters = ['name', 'email']
+    words = words.replace(/e|[è-ë]/gi, '(?:e|[è-ë])')
 
-    const searchParamsKeys = Object.keys(searchParams)
+    words = words.replace(/i|[ì-ï]/gi, '(?:i|[ì-ï])')
 
-    const correctStructure = searchParamsKeys.every((searchParamsKey) => searchableParameters.includes(searchParamsKey))
+    words = words.replace(/o|[ò-ö]/gi, '(?:o|[ò-ö])')
 
-    return correctStructure
-  } */
+    words = words.replace(/u|[ù-ü]/gi, '(?:u|[ù-ü])')
 
-  /* private treatmentOfSearchParams (searchParams: { name: string; email: string}): { [param: string]: object } {
-    let searchParamsArray = Object.entries(searchParams)
+    words = words.replace(/c|ç/gi, '(?:c|ç)')
 
-    searchParamsArray = searchParamsArray.map((pair) => [pair[0], (pair[1] as string).replace(new RegExp('[^a-zA-Z0-9]', 'g'), (character: string) => '\\' + character)])
+    return words
+  }
 
-    const treatedParamsArray: [string, object][] = []
+  public static async find (data: Record<string, unknown>): Promise<PaginateResult<UserInterface> | UserInterface | null> {
+    let { page = 1, limit = 10, ...searchParams } = data
 
-    searchParamsArray.forEach((pair) => {
-      treatedParamsArray.push([pair[0], { $regex: new RegExp((pair[1] as string), 'i') }])
-    })
+    if (typeof page === 'string' && page.match(/^[1-9]\d*$/)) {
+      page = parseInt(page)
+    }
 
-    const treatedParams: {
-      [param: string]: object;
-    } = {}
+    if (typeof page !== 'number') {
+      throw new Error('page must be an unsigned integer')
+    }
 
-    treatedParamsArray.forEach((pair) => {
-      treatedParams[pair[0]] = pair[1]
-    })
+    if (typeof limit === 'string' && limit.match(/^[1-9]\d*$/)) {
+      limit = parseInt(limit)
+    }
 
-    return treatedParams
-  } */
-
-  /* public find = async (data: Record<string, unknown>): Promise<PaginateResult<UserInterface> | UserInterface | null> => {
-    const { page, limit, ...searchParams } = data
-
-    if (Object.keys(searchParams).length === 0) {
-      return this.paginateAbstraction(page, limit)
+    if (typeof limit !== 'number') {
+      throw new Error('limit must be an unsigned integer')
     }
 
     if (searchParams._id) {
       return User.findById(searchParams._id)
     }
 
-    if (!this.validateSearchParams(searchParams)) {
-      throw new Error('there is a problem with the search parameters')
+    if (typeof searchParams.simpleSearch === 'string') {
+      const teatedString = this.treatAccents(searchParams.simpleSearch)
+
+      return User.paginate({
+        $or: [
+          { name: { $regex: new RegExp(teatedString, 'i') } },
+          { email: { $regex: new RegExp(teatedString, 'i') } }
+        ]
+      }, { page, limit })
     }
 
-    const treatedParams = this.treatmentOfSearchParams(searchParams)
-
-    return this.paginateAbstraction(page, limit, treatedParams)
-  } */
+    return User.paginate(undefined, { page, limit })
+  }
 
   public static async delete (data: Record<string, unknown>): Promise<void> {
     const id = data.userId
