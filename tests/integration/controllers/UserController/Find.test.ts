@@ -72,7 +72,7 @@ describe('Testing user research routes', () => {
       .query({
         page: 1,
         limit: 2,
-        name: user1.name
+        simpleSearch: user1.name
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -85,7 +85,7 @@ describe('Testing user research routes', () => {
       .query({
         page: 1,
         limit: 2,
-        name: user1.name
+        simpleSearch: user1.name.toUpperCase()
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -98,7 +98,7 @@ describe('Testing user research routes', () => {
       .query({
         page: 1,
         limit: 2,
-        email: user1.email
+        simpleSearch: user1.email
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -111,53 +111,11 @@ describe('Testing user research routes', () => {
       .query({
         page: 1,
         limit: 2,
-        email: user1.email
+        simpleSearch: user1.email.toUpperCase()
       })
 
     chai.expect(res.status).to.be.equal(200)
     chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
-  })
-
-  it('Should return the user regarding name and email', async () => {
-    const res = await chai.request(app)
-      .get('/users')
-      .query({
-        page: 1,
-        limit: 2,
-        name: user1.name,
-        email: user1.email
-      })
-
-    chai.expect(res.status).to.be.equal(200)
-    chai.expect(JSON.parse(res.text).docs.length).to.be.equal(1)
-  })
-
-  it('Should not return a user because there is no user with the name and email', async () => {
-    const res = await chai.request(app)
-      .get('/users')
-      .query({
-        page: 1,
-        limit: 2,
-        name: user1.name,
-        email: user2.email
-      })
-
-    chai.expect(res.status).to.be.equal(200)
-    chai.expect(JSON.parse(res.text).docs.length).to.be.equal(0)
-  })
-
-  it('Should not return a user because there is no user with the name and email', async () => {
-    const res = await chai.request(app)
-      .get('/users')
-      .query({
-        page: 1,
-        limit: 2,
-        name: user2.name,
-        email: user1.email
-      })
-
-    chai.expect(res.status).to.be.equal(200)
-    chai.expect(JSON.parse(res.text).docs.length).to.be.equal(0)
   })
 
   it('Should return the user corresponding to the given _id', async () => {
@@ -195,8 +153,7 @@ describe('Testing user research routes', () => {
       .query({
         page: 36,
         limit: 50,
-        name: user2.name,
-        email: user1.email,
+        simpleSearch: user2.name,
         _id: id
       })
 
@@ -210,21 +167,8 @@ describe('Testing user research routes', () => {
       .query({
         page: 36,
         limit: 50,
-        name: user2.name,
-        email: user1.email,
+        simpleSearch: user2.name,
         _id: 'pro'
-      })
-
-    chai.expect(res.status).to.be.equal(400)
-  })
-
-  it('Should fail because provides an invalid property', async () => {
-    const res = await chai.request(app)
-      .get('/users')
-      .query({
-        page: 1,
-        limit: 10,
-        dateOfBirth: user1.dateOfBirth
       })
 
     chai.expect(res.status).to.be.equal(400)
