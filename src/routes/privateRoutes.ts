@@ -4,6 +4,10 @@ import UserController from '../controllers/UserController'
 import ProductController from '../controllers/ProductController'
 import AuthMiddleware from '../middlewares/AuthMiddleware'
 
+export interface PrivateBody extends Record<string, unknown> {
+  userId: string;
+}
+
 const routes = Router()
 
 routes.use(AuthMiddleware.authVerification)

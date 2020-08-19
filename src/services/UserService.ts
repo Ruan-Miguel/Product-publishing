@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { Error, PaginateResult } from 'mongoose'
 
+import { PrivateBody } from '../routes/privateRoutes'
 import User, { UserInterface } from '../models/User'
 import Product from '../models/Product'
 import authConfig from '../config/auth.json'
@@ -101,15 +102,13 @@ class UserService {
     return User.paginate(undefined, { page, limit })
   }
 
-  public static async delete (data: Record<string, unknown>): Promise<void> {
+  public static async delete (data: PrivateBody): Promise<void> {
     const id = data.userId
 
-    if (typeof id === 'string') {
-      await Product.deleteMany({ owner: id })
-        .then(async () => {
-          await User.findByIdAndDelete(id)
-        })
-    }
+    await Product.deleteMany({ owner: id })
+      .then(async () => {
+        await User.findByIdAndDelete(id)
+      })
   }
 }
 
