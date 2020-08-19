@@ -6,6 +6,7 @@ import faker from 'faker'
 import app from '../../../../src/app'
 import ClearDatabase from '../../../utils/ClearDatabase'
 import factory, { UserInterface, ProductInterface } from '../../../utils/factories'
+import { json } from 'express'
 
 chai.use(chaiHttp)
 
@@ -179,7 +180,7 @@ describe('Testing product research routes', () => {
       .query({
         page: 1,
         limit: 10,
-        categories: product1.categories[1]
+        categories: JSON.stringify([product1.categories[1]])
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -192,7 +193,7 @@ describe('Testing product research routes', () => {
       .query({
         page: 1,
         limit: 10,
-        categories: product1.categories[0]
+        categories: JSON.stringify([product1.categories[0]])
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -205,7 +206,7 @@ describe('Testing product research routes', () => {
       .query({
         page: 1,
         limit: 10,
-        categories: product1.categories[0] + 'a'
+        categories: JSON.stringify([product1.categories[0] + 'a'])
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -233,7 +234,7 @@ describe('Testing product research routes', () => {
         page: 1,
         limit: 10,
         name: product1.name,
-        categories: product1.categories[1]
+        categories: JSON.stringify([product1.categories[1]])
       })
 
     chai.expect(res.status).to.be.equal(200)
@@ -247,7 +248,7 @@ describe('Testing product research routes', () => {
         page: 1,
         limit: 10,
         name: product1.name,
-        categories: product2.categories[1]
+        categories: JSON.stringify([product2.categories[1]])
       })
 
     chai.expect(res.status).to.be.equal(200)
