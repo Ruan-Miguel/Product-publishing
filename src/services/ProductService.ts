@@ -1,7 +1,8 @@
-import { Error/* , PaginateResult */ } from 'mongoose'
+import { Error, PaginateResult } from 'mongoose'
 
-import Product/* , { ProductInterface } */ from '../models/Product'
+import Product, { ProductInterface } from '../models/Product'
 import { PrivateBody } from '../routes/privateRoutes'
+import treatAccents from '../utils/treatAccents'
 
 class ProductService {
   public static async create (data: Record<string, unknown>): Promise<string> {
@@ -14,12 +15,8 @@ class ProductService {
       .then(({ _id }) => _id)
   }
 
-  /* private static async paginateAbstraction (page = 1, limit = 10, searchParams: object = {}): Promise<PaginateResult<ProductInterface>> {
-    return Product.paginate(searchParams, { page, limit, populate: 'owner' })
-  }
-
   private static validateSearchParams (searchParams: object): boolean {
-    const searchableParameters = ['_id', 'owner', 'name', 'categories', 'maxPrice']
+    const searchableParameters = ['owner', 'name', 'categories', 'maxPrice']
 
     const searchParamsKeys = Object.keys(searchParams)
 
@@ -28,13 +25,26 @@ class ProductService {
     return correctStructure
   }
 
-  private static treatmentOfSearchParams (searchParams: { name?: string; maxPrice?: string}): object {
+  private static treatmentOfSearchParams (searchParams: { owner?: string; name?: string; categories?: string; maxPrice?: string}): { owner?: string; name?: object; categories?: object; price?: object } {
     const newProperties: {
-      [property: string]: object;
+      owner?: string;
+      name?: object;
+      categories?: object;
+      price?: object;
     } = {}
 
+    if (searchParams.owner) {
+      newProperties.owner = searchParams.owner
+    }
+
     if (searchParams.name) {
-      newProperties.name = { $regex: new RegExp(searchParams.name, 'i') }
+      const IgnoreAccent = treatAccents(searchParams.name)
+
+      newProperties.name = { $regex: new RegExp(IgnoreAccent, 'i') }
+    }
+
+    if (searchParams.categories) {
+      newProperties.categories = { $all: JSON.parse(searchParams.categories) }
     }
 
     if (searchParams.maxPrice) {
@@ -43,36 +53,44 @@ class ProductService {
       delete searchParams.maxPrice
     }
 
-    Object.assign(searchParams, newProperties)
-
-    return searchParams
+    return newProperties
   }
 
-  public static async find (req: Request, res: Response): Promise<Response> {
-    const { page, limit, ...searchParams } = req.query
+  public static async find (data: Record<string, unknown>): Promise<PaginateResult<ProductInterface> | ProductInterface | null> {
+    let { page = 1, limit = 10, ...searchParams } = data
+
+    if (typeof page === 'string' && page.match(/^[1-9]\d*$/)) {
+      page = parseInt(page)
+    }
+
+    if (typeof page !== 'number') {
+      throw new Error('page must be an unsigned integer')
+    }
+
+    if (typeof limit === 'string' && limit.match(/^[1-9]\d*$/)) {
+      limit = parseInt(limit)
+    }
+
+    if (typeof limit !== 'number') {
+      throw new Error('limit must be an unsigned integer')
+    }
 
     if (Object.keys(searchParams).length === 0) {
-      return res.json(await this.paginateAbstraction(page, limit))
+      return Product.paginate(undefined, { page, limit, populate: 'owner' })
     }
 
     if (searchParams._id) {
       return Product.findById(searchParams._id).populate('owner')
-        .then((product) => res.json(product))
-        .catch((err: Error) => res.status(400).json(err.message))
     }
 
     if (!this.validateSearchParams(searchParams)) {
-      return res.status(400).json('there is a problem with the search parameters')
+      throw new Error('there is a problem with the search parameters')
     }
 
     const treatedParams = this.treatmentOfSearchParams(searchParams)
 
-    try {
-      return res.json(await this.paginateAbstraction(page, limit, treatedParams))
-    } catch (e) {
-      return res.status(400).json(e.message)
-    }
-  } */
+    return Product.paginate(treatedParams, { page, limit, populate: 'owner' })
+  }
 
   public static async delete (data: PrivateBody): Promise<void> {
     const { userId, productId } = data
